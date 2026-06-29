@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BABO Exchange — 가상 투자 시뮬레이션</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 상단 바 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◆</span> BABO <span class="brand-sub">Exchange</span>
+    </div>
+    <div class="topbar-stats">
+      <div class="stat">
+        <span class="stat-label">DAY</span>
+        <span class="stat-value" id="dayCount">1</span>
+        <span class="stat-sub">/ <span id="maxDay">30</span></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">현금 (USDT)</span>
+        <span class="stat-value" id="cash">10,000.00</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">총 자산</span>
+        <span class="stat-value" id="netWorth">10,000.00</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">수익률</span>
+        <span class="stat-value" id="totalReturn">0.00%</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="nextDayBtn" class="btn btn-next">다음 날 ▶</button>
+      <button id="resetBtn" class="btn btn-ghost">새 게임</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 좌측: 코인 목록 + 랭킹 -->
+    <div class="col col-left">
+      <section class="panel market-panel">
+        <h2 class="panel-title">마켓</h2>
+        <div class="market-head">
+          <span>코인</span><span>가격</span><span>24h</span>
+        </div>
+        <ul id="marketList" class="market-list"></ul>
+      </section>
+
+      <section class="panel rank-panel">
+        <h2 class="panel-title">🏆 실시간 랭킹</h2>
+        <ul id="leaderboard" class="leaderboard"></ul>
+      </section>
+    </div>
+
+    <!-- 중앙: 차트 + 뉴스 + 채팅 -->
+    <section class="panel chart-panel">
+      <div class="chart-header">
+        <div>
+          <span id="chartSymbol" class="chart-symbol">BTC</span>
+          <span id="chartName" class="chart-name">비트코인</span>
+        </div>
+        <div class="chart-price-wrap">
+          <span id="chartPrice" class="chart-price">0</span>
+          <span id="chartChange" class="chart-change">0.00%</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart" class="chart-canvas"></canvas>
+        <div class="chart-tools">
+          <button data-zoom="in" title="확대">＋</button>
+          <button data-zoom="out" title="축소">－</button>
+          <button data-zoom="reset" title="전체보기">⤢</button>
+        </div>
+      </div>
+
+      <div class="bottom-row">
+        <div class="news-box">
+          <div class="news-title">📰 오늘의 시장 뉴스</div>
+          <ul id="newsList" class="news-list"></ul>
+        </div>
+
+        <div class="chat-box">
+          <div class="chat-title">💬 종목토론방 <span class="chat-online" id="chatOnline"></span></div>
+          <ul id="chatList" class="chat-list"></ul>
+          <div class="chat-input-row">
+            <input id="chatInput" type="text" maxlength="120" placeholder="메시지 입력…" />
+            <button id="chatSend" class="btn btn-next chat-send">전송</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 우측: 거래 + 보유자산 -->
+    <section class="panel trade-panel">
+      <h2 class="panel-title">거래 — <span id="tradeSymbol">BTC</span></h2>
+      <div class="trade-tabs">
+        <button class="tab tab-buy active" data-side="buy">매수</button>
+        <button class="tab tab-sell" data-side="sell">매도</button>
+      </div>
+      <div class="trade-form">
+        <label class="field">
+          <span>수량</span>
+          <input id="qtyInput" type="number" min="0" step="0.0001" placeholder="0.00" />
+        </label>
+        <div class="pct-row">
+          <button class="pct" data-pct="0.25">25%</button>
+          <button class="pct" data-pct="0.5">50%</button>
+          <button class="pct" data-pct="0.75">75%</button>
+          <button class="pct" data-pct="1">100%</button>
+        </div>
+        <div class="order-info">
+          <div><span>예상 금액</span><span id="orderTotal">0.00 USDT</span></div>
+          <div><span>주문 가능</span><span id="orderAvail">—</span></div>
+        </div>
+        <button id="submitOrder" class="btn btn-submit btn-buy">매수</button>
+      </div>
+
+      <h3 class="sub-title">보유 자산</h3>
+      <ul id="holdingsList" class="holdings-list"></ul>
+    </section>
+  </main>
+
+  <!-- 게임 종료 모달 -->
+  <div id="endModal" class="modal hidden">
+    <div class="modal-card">
+      <h2>🏁 게임 종료!</h2>
+      <div class="winner-coin">
+        <div class="winner-label">📈 이번 시즌의 승자 코인</div>
+        <div id="winnerSymbol" class="winner-symbol">—</div>
+        <div id="winnerReturn" class="winner-return">—</div>
+      </div>
+      <div class="result-grid">
+        <div><span>최종 자산</span><strong id="finalNet">—</strong></div>
+        <div><span>나의 수익률</span><strong id="finalReturn">—</strong></div>
+        <div><span>최종 순위</span><strong id="finalRank">—</strong></div>
+      </div>
+      <div id="playerRanking" class="coin-ranking"></div>
+      <div id="coinRanking" class="coin-ranking"></div>
+      <button id="playAgain" class="btn btn-next">다시 플레이</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="game.js"></script>
+</body>
+</html>
